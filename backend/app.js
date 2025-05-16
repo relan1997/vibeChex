@@ -4,7 +4,10 @@ import mongoose from "mongoose";
 import dotenv from "dotenv";
 import QuestionsModel from "./models/questionModel.js";
 import genAI from "./helpers/geminiClient.js";
-import  extractJsonFromMarkdown  from "./helpers/extractJsonFromMarkdown.js";
+import extractJsonFromMarkdown from "./helpers/extractJsonFromMarkdown.js";
+import questionPrompt from "./helpers/questionPrompt.js";
+import buildPrompt from "./helpers/buildPrompt.js";
+import personalityModel from "./models/personalityModel.js";
 dotenv.config();
 
 mongoose
@@ -15,50 +18,6 @@ mongoose
 const app = express();
 app.use(cors());
 app.use(express.json());
-
-
-
-const prompt=`You are an API that generates a list of personality quiz questions designed to determine a person's "vibe". Your task is to return a JSON object containing a customId and exactly 12 questions. Each question must include a "questionText" and an "options" array of exactly four multiple choice answers. Use the provided structure strictly.
-
-Return the data in the following JSON format:
-
-{
-  "questions": [
-    {
-      "questionText": "string",       // the quiz question
-      "options": [
-        "string",                     // option A
-        "string",                     // option B
-        "string",                     // option C
-        "string"                      // option D
-      ]
-    },
-    ...
-  ]
-}
-
-There must be exactly 12 questions, each with exactly 4 options.
-
-The vibe types you must use as the inspiration for the personality traits behind each option are:
-
-🌿 Chill Zen – calm, peaceful, introspective  
-🔥 Chaotic Energy – spontaneous, loud, fun, unpredictable  
-🌌 Mysterious Dreamer – imaginative, deep thinker, introverted  
-🎨 Creative Soul – expressive, artsy, idea-oriented  
-🧠 Analytical Strategist – logical, planner, sharp  
-😎 Confident Charmer – social, smooth, magnetic  
-💖 Wholesome Angel – kind-hearted, supportive, warm  
-🌪️ Rebellious Spirit – edgy, nonconformist, bold  
-🌞 Golden Retriever Energy – loyal, enthusiastic, happy-go-lucky  
-🌧️ Melancholic Poet – sensitive, thoughtful, emotional depth
-
-Guidelines:
-- All questions must be casual, fun, and personality-revealing.
-- Each question should cover one or more of the above personality types through its options.
-- Each option must reflect a different vibe from the list above.
-- Do NOT assign vibe labels in the JSON—just ensure the answers are clearly aligned in tone.
-- Do not include explanations, markdown, comments, or extra text—respond with only the raw JSON object.
-`
 
 app.post("/api/:id/generate", async (req, res) => {
   try {
@@ -78,9 +37,9 @@ app.post("/api/:id/generate", async (req, res) => {
 
     // 🧠 Call Gemini if no record found
     const model = genAI.getGenerativeModel({ model: "gemini-2.0-flash" });
-    const result = await model.generateContent(prompt);
+    const result = await model.generateContent(questionPrompt);
     const response = result.response;
-    const text =response.text();
+    const text = response.text();
     const json = extractJsonFromMarkdown(text); // Should return { questions: [...] }
 
     if (!json.questions || !Array.isArray(json.questions)) {
@@ -88,7 +47,10 @@ app.post("/api/:id/generate", async (req, res) => {
     }
 
     // 💾 Save new question set to DB
-    const saved = new QuestionsModel({ customId: id, questions: json.questions });
+    const saved = new QuestionsModel({
+      customId: id,
+      questions: json.questions,
+    });
     await saved.save();
 
     res.status(200).json({ questions: json.questions });
@@ -116,7 +78,56 @@ app.post("/api/:id/generate", async (req, res) => {
   }
 });
 
+//const PersonalityResult = require("./models/PersonalityResult"); // import your mongoose model
 
+app.post("/api/:id/result", async (req, res) => {
+  try {
+    const userAnswers = req.body.answers; // should be an array of questionText + selectedOption
+    if (!Array.isArray(userAnswers)) {
+      return res.status(400).json({ error: "Invalid input format" });
+    }
+
+    const questionPrompt = buildPrompt(userAnswers);
+    const model = genAI.getGenerativeModel({ model: "gemini-2.0-flash" });
+
+    const result = await model.generateContent(questionPrompt);
+    const response = result.response;
+    const text = await response.text();
+
+    const json = extractJsonFromMarkdown(text);
+
+    if (!json) {
+      return res
+        .status(500)
+        .json({ error: "Failed to parse personality result" });
+    }
+
+    // Use findOneAndUpdate with upsert:true to insert or replace the existing record
+    await personalityModel.findOneAndUpdate(
+      { customId: req.params.id },
+      { customId: req.params.id, ...json },
+      { upsert: true, new: true, overwrite: true }
+    );
+
+    res.json({ message: "Personality result saved successfully." });
+  } catch (err) {
+    console.error("Error generating or saving personality result:", err);
+    res.status(500).json({ error: "Internal server error" });
+  }
+});
+
+
+app.get('/api/:id/personality', async (req, res) => {
+  try {
+    console.log('Fetching personality result for ID:', req.params.id);
+    const result = await personalityModel.findOne({ customId: req.params.id });
+    if (!result) return res.status(404).json({ message: 'Not found' });
+    console.log('Result:', result);
+    res.json(result);
+  } catch (err) {
+    res.status(500).json({ message: 'Server error' });
+  }
+});
 
 app.listen(process.env.PORT, () => {
   console.log(`Server is running on port ${process.env.PORT}`);
