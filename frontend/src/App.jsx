@@ -2,6 +2,7 @@ import { useState } from 'react'
 import './App.css'
 import { Routes, Route } from 'react-router-dom'
 import HomePage from './pages/HomePage/HomePage'
+import Questions from './pages/Questions/Questions'
 function App() {
   
 
@@ -9,7 +10,7 @@ function App() {
     <>
       <Routes>
         <Route path='/' element={<HomePage/>}/>
-        <Route path='/questions' element={<Questions/>}/>
+        <Route path='/:id/questions' element={<Questions/>}/>
       </Routes>
     </>
     )

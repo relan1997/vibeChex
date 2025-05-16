@@ -3,7 +3,8 @@ import cors from "cors";
 import mongoose from "mongoose";
 import dotenv from "dotenv";
 import QuestionsModel from "./models/questionModel.js";
-import genAI from "./geminiClient.js";
+import genAI from "./helpers/geminiClient.js";
+import  extractJsonFromMarkdown  from "./helpers/extractJsonFromMarkdown.js";
 dotenv.config();
 
 mongoose
@@ -15,14 +16,7 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 
-function extractJsonFromMarkdown(raw) {
-  if (typeof raw !== "string") {
-    throw new Error("Expected a string input to extractJsonFromMarkdown");
-  }
 
-  const cleaned = raw.replace(/^```json\n/, "").replace(/\n```$/, "");
-  return JSON.parse(cleaned);
-}
 
 const prompt=`You are an API that generates a list of personality quiz questions designed to determine a person's "vibe". Your task is to return a JSON object containing a customId and exactly 12 questions. Each question must include a "questionText" and an "options" array of exactly four multiple choice answers. Use the provided structure strictly.
 
@@ -70,21 +64,34 @@ app.post("/api/:id/generate", async (req, res) => {
   try {
     const { id } = req.params;
     console.log("ID from request:", id);
+
     if (!id) {
       return res.status(400).json({ error: "Missing ID parameter" });
     }
 
+    // ✅ Check database for existing entry
+    const existing = await QuestionsModel.findOne({ customId: id });
+    if (existing) {
+      console.log("Returning existing question set from DB");
+      return res.status(200).json({ questions: existing.questions });
+    }
+
+    // 🧠 Call Gemini if no record found
     const model = genAI.getGenerativeModel({ model: "gemini-2.0-flash" });
     const result = await model.generateContent(prompt);
     const response = result.response;
-    const text = await response.text();
-    const json = extractJsonFromMarkdown(text);
+    const text =response.text();
+    const json = extractJsonFromMarkdown(text); // Should return { questions: [...] }
 
-    res.status(200).json({
-      message: "AI response",
-      boardId: id,
-      data: json,
-    });
+    if (!json.questions || !Array.isArray(json.questions)) {
+      return res.status(500).json({ error: "Invalid AI response format" });
+    }
+
+    // 💾 Save new question set to DB
+    const saved = new QuestionsModel({ customId: id, questions: json.questions });
+    await saved.save();
+
+    res.status(200).json({ questions: json.questions });
   } catch (error) {
     if (error.name === "TypeError") {
       return res.status(400).json({
@@ -92,12 +99,14 @@ app.post("/api/:id/generate", async (req, res) => {
         details: error.message,
       });
     }
+
     if (error.name === "ApiError") {
       return res.status(502).json({
         error: "AI service error",
         details: error.message,
       });
     }
+
     console.error("Error in generate endpoint:", error);
     res.status(500).json({
       error: "Internal server error",
@@ -106,6 +115,8 @@ app.post("/api/:id/generate", async (req, res) => {
     });
   }
 });
+
+
 
 app.listen(process.env.PORT, () => {
   console.log(`Server is running on port ${process.env.PORT}`);
