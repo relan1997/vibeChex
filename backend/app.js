@@ -8,6 +8,8 @@ import extractJsonFromMarkdown from "./helpers/extractJsonFromMarkdown.js";
 import questionPrompt from "./helpers/questionPrompt.js";
 import buildPrompt from "./helpers/buildPrompt.js";
 import personalityModel from "./models/personalityModel.js";
+import axios from "axios";
+
 dotenv.config();
 
 mongoose
@@ -28,25 +30,22 @@ app.post("/api/:id/generate", async (req, res) => {
       return res.status(400).json({ error: "Missing ID parameter" });
     }
 
-    // ✅ Check database for existing entry
     const existing = await QuestionsModel.findOne({ customId: id });
     if (existing) {
       console.log("Returning existing question set from DB");
       return res.status(200).json({ questions: existing.questions });
     }
 
-    // 🧠 Call Gemini if no record found
     const model = genAI.getGenerativeModel({ model: "gemini-2.0-flash" });
     const result = await model.generateContent(questionPrompt);
     const response = result.response;
     const text = response.text();
-    const json = extractJsonFromMarkdown(text); // Should return { questions: [...] }
+    const json = extractJsonFromMarkdown(text);
 
     if (!json.questions || !Array.isArray(json.questions)) {
       return res.status(500).json({ error: "Invalid AI response format" });
     }
 
-    // 💾 Save new question set to DB
     const saved = new QuestionsModel({
       customId: id,
       questions: json.questions,
@@ -78,11 +77,9 @@ app.post("/api/:id/generate", async (req, res) => {
   }
 });
 
-//const PersonalityResult = require("./models/PersonalityResult"); // import your mongoose model
-
 app.post("/api/:id/result", async (req, res) => {
   try {
-    const userAnswers = req.body.answers; // should be an array of questionText + selectedOption
+    const userAnswers = req.body.answers;
     if (!Array.isArray(userAnswers)) {
       return res.status(400).json({ error: "Invalid input format" });
     }
@@ -92,30 +89,36 @@ app.post("/api/:id/result", async (req, res) => {
 
     const result = await model.generateContent(questionPrompt);
     const response = result.response;
-    const text = await response.text();
+    const text = response.text();
 
     const json = extractJsonFromMarkdown(text);
 
-    if (!json) {
-      return res
-        .status(500)
-        .json({ error: "Failed to parse personality result" });
+    if (!json || !json.briefDescription) {
+      return res.status(500).json({ error: "Failed to parse personality result" });
     }
 
-    // Use findOneAndUpdate with upsert:true to insert or replace the existing record
+    const lastAnswer = userAnswers[userAnswers.length - 1]?.selectedOption;
+    console.log("Last answer (animal):", lastAnswer);
+    if (!lastAnswer) {
+      return res.status(400).json({ error: "Missing final answer (animal)" });
+    }
+
     await personalityModel.findOneAndUpdate(
       { customId: req.params.id },
       { customId: req.params.id, ...json },
       { upsert: true, new: true, overwrite: true }
     );
 
-    res.json({ message: "Personality result saved successfully." });
+    res.json({
+      message: "Personality result saved successfully.",
+      personality: json,
+    });
+
   } catch (err) {
     console.error("Error generating or saving personality result:", err);
     res.status(500).json({ error: "Internal server error" });
   }
 });
-
 
 app.get('/api/:id/personality', async (req, res) => {
   try {

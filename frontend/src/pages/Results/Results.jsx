@@ -1,32 +1,31 @@
 import React, { useEffect, useState } from 'react';
-import { useParams, useSearchParams } from 'react-router-dom';
+import { useParams } from 'react-router-dom';
 import axios from 'axios';
 
 const Results = () => {
   const [result, setResult] = useState(null);
   const [loading, setLoading] = useState(true);
-  const { id } = useParams(); // Get ?id=123 from the URL
+  const { id } = useParams();
 
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        console.log('Fetching data for customId:', id);
+        const backendUrl = "http://localhost:1997";
+        const res = await axios.get(`${backendUrl}/api/${id}/personality`);
+        console.log('Response received:', res.data);
+        setResult(res.data);
+      } catch (error) {
+        console.error('Fetch error:', error);
+      } finally {
+        console.log("Setting loading to false");
+        setLoading(false);
+      }
+    };
 
-useEffect(() => {
-  const fetchData = async () => {
-    try {
-      console.log('Fetching data for customId:', id);
-      const backendUrl = "http://localhost:1997";
-      const res = await axios.get(`${backendUrl}/api/${id}/personality`);
-      console.log('Response received:', res.data);
-      setResult(res.data);
-    } catch (error) {
-      console.error('Fetch error:', error);
-    } finally {
-      console.log("Setting loading to false");
-      setLoading(false);
-    }
-  };
-
-  if (id) fetchData();
-  else console.warn("No customId in query params!");
-}, [id]);
+    if (id) fetchData();
+    else console.warn("No customId in query params!");
+  }, [id]);
 
   if (loading) return <div>Loading...</div>;
   if (!result) return <div>No result found.</div>;
@@ -34,6 +33,15 @@ useEffect(() => {
   return (
     <div className="p-4 max-w-3xl mx-auto">
       <h1 className="text-2xl font-bold mb-4">Personality Result</h1>
+
+      {result.imageUrl && (
+        <img
+          src={result.imageUrl}
+          alt="Personality Visual"
+          className="w-full max-h-[400px] object-cover rounded-xl shadow mb-6"
+        />
+      )}
+
       <p className="mb-6 text-gray-700 italic">{result.briefDescription}</p>
 
       {[

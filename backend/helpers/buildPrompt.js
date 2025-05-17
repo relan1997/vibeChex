@@ -16,7 +16,8 @@ Based only on the user's selected answers, analyze their personality and return 
 - timeOfDay
 - fictionalCharacter
 - zodiacAlignment
-Also give 1-2 sentence descriptions for each of these keys, explaining how they relate to the user's personality.
+Strictly Also give 1-2 sentence descriptions for each of these keys, explaining how they relate to the user's personality.
+Give me emojis where appropriate.
 Respond with **only** the JSON object and nothing else.
 `;
 }

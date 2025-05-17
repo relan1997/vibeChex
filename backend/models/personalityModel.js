@@ -41,5 +41,5 @@ const personalitySchema = new mongoose.Schema({
   }
 });
 
-const personalityModel =mongoose.model('PersonalityResult', personalitySchema);
+const personalityModel = mongoose.model('PersonalityResult', personalitySchema);
 export default personalityModel;

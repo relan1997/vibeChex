@@ -10,11 +10,14 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "@api/starryai": "file:.api/apis/starryai",
     "@google/genai": "^0.14.1",
     "@google/generative-ai": "^0.24.1",
+    "axios": "^1.9.0",
     "cors": "^2.8.5",
     "dotenv": "^16.5.0",
     "express": "^5.1.0",
+    "json5": "^2.2.3",
     "mongoose": "^8.14.3",
     "nodemon": "^3.1.10"
   }
