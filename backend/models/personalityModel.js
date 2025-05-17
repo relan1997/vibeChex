@@ -37,6 +37,8 @@ const personalitySchema = new mongoose.Schema({
   zodiacAlignment: String,
   zodiacAlignmentDescription: String,
 
+  roast:String,
+
   createdAt: {
     type: Date,
     default: Date.now

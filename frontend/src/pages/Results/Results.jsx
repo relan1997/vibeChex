@@ -34,9 +34,9 @@ const Results = () => {
     <div className="p-4 max-w-3xl mx-auto">
       <h1 className="text-2xl font-bold mb-4">Personality Result</h1>
 
-      {result.imageUrl && (
+      {result.pokemonImage && (
         <img
-          src={result.imageUrl}
+          src={result.pokemonImage}
           alt="Personality Visual"
           className="w-full max-h-[400px] object-cover rounded-xl shadow mb-6"
         />
@@ -79,6 +79,14 @@ const Results = () => {
           <p className="text-gray-600">{result[item.descKey]}</p>
         </div>
       ))}
+
+      {/* Roast Section */}
+      {result.roast && (
+        <div className="mt-10 p-4 bg-red-50 border border-red-300 rounded-lg">
+          <h2 className="text-xl font-bold text-red-600 mb-2">🔥 Roast</h2>
+          <p className="italic text-red-700 whitespace-pre-line">{result.roast}</p>
+        </div>
+      )}
     </div>
   );
 };

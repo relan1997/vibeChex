@@ -5,10 +5,12 @@ import dotenv from "dotenv";
 import QuestionsModel from "./models/questionModel.js";
 import genAI from "./helpers/geminiClient.js";
 import extractJsonFromMarkdown from "./helpers/extractJsonFromMarkdown.js";
-import questionPrompt from "./helpers/questionPrompt.js";
-import buildPrompt from "./helpers/buildPrompt.js";
+import questionPrompt from "./prompts/questionPrompt.js";
+import buildPrompt from "./prompts/buildPrompt.js";
 import personalityModel from "./models/personalityModel.js";
 import axios from "axios";
+import checkImageExists from "./helpers/checkImageExists.js";
+import validatePokemon from "./helpers/validatePokemon.js";
 
 dotenv.config();
 
@@ -21,28 +23,10 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 
-const checkImageExists = async (url) => {
-  try {
-    const res = await fetch(url, { method: "HEAD" });
-    return res.ok;
-  } catch {
-    return false;
-  }
-};
+
 
 // Utility to validate Pokemon via PokeAPI
-const validatePokemon = async (name) => {
-  const formatted = name.toLowerCase().replace(/[^a-z0-9-]/g, "-");
-  try {
-    const res = await fetch(`https://pokeapi.co/api/v2/pokemon/${formatted}`);
-    if (res.ok) {
-      return formatted;
-    }
-  } catch (err) {
-    console.warn("PokéAPI validation failed:", err);
-  }
-  return null;
-};
+
 
 app.post("/api/:id/generate", async (req, res) => {
   try {
@@ -117,7 +101,13 @@ app.post("/api/:id/result", async (req, res) => {
 
     const json = extractJsonFromMarkdown(text);
 
-    if (!json || !json.briefDescription || !json.pokemon || !json.pokemonName) {
+    if (
+      !json ||
+      !json.briefDescription ||
+      !json.pokemon ||
+      !json.pokemonName ||
+      !json.roast // ✅ Ensure roast is present
+    ) {
       return res
         .status(500)
         .json({ error: "Failed to parse personality result" });
@@ -181,6 +171,7 @@ app.post("/api/:id/result", async (req, res) => {
     res.status(500).json({ error: "Internal server error" });
   }
 });
+
 
 app.get("/api/:id/personality", async (req, res) => {
   try {
