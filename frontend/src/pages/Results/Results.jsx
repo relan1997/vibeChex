@@ -63,7 +63,7 @@ const AccentCircle = styled.div`
 
 const ContentWrapper = styled.div`
   width: 100%;
-  margin: 5rem auto 2rem;
+  margin: 3rem auto 2rem;
   position: relative;
   z-index: 1;
   display: flex;
@@ -89,6 +89,11 @@ const PageTitle = styled.h1`
   }
 `;
 
+const TitleGlow = styled.span`
+  color: #e0e0e0;
+  text-shadow: 0 0 15px #bfc1c280, 0 0 25px #bfc1c240;
+`;
+
 const Description = styled.p`
   font-size: 1rem;
   color: #8a8d91;
@@ -102,6 +107,21 @@ const Description = styled.p`
   
   @media (max-width: 600px) {
     font-size: 0.92rem;
+  }
+`;
+
+const Subtitle = styled.h2`
+  font-size: 1.5rem;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  margin-bottom: 2rem;
+  color: #bfc1c2;
+  text-align: center;
+  transition: font-size 0.2s;
+  opacity: 0.9;
+  
+  @media (max-width: 600px) {
+    font-size: 1.2rem;
   }
 `;
 
@@ -121,35 +141,76 @@ const popIn = keyframes`
   100% { transform: scale(1); opacity: 1; }
 `;
 
-const ResultCard = styled.div`
-  background: linear-gradient(90deg, #232526 0%, #18191a 100%);
-  border-radius: 1rem;
-  padding: 1.25rem 1rem;
-  transition: all 0.3s ease;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+// Flip Card Container
+const FlipCardContainer = styled.div`
+  perspective: 1000px;
   animation: ${popIn} 0.5s ease-out forwards;
   animation-delay: ${props => props.index * 0.1}s;
   opacity: 0;
-  display: flex;
-  flex-direction: column;
+  height: 230px;
+  transition: transform 0.3s ease;
   
   &:hover {
     transform: translateY(-5px);
-    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3);
-    background: linear-gradient(90deg, #18191a 0%, #232526 100%);
   }
 `;
 
-const PokemonCard = styled(ResultCard)`
-  display: grid;
-  grid-template-columns: 1fr auto;
-  grid-template-rows: auto auto auto;
-  grid-template-areas:
-    "label img"
-    "value img"
-    "desc desc";
-  column-gap: 0.75rem;
-  align-items: start;
+// Flip Card Inner Container
+const FlipCardInner = styled.div`
+  position: relative;
+  width: 100%;
+  height: 100%;
+  text-align: center;
+  transition: transform 0.8s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  transform-style: preserve-3d;
+  transform: ${props => (props.isFlipped ? "rotateY(180deg)" : "rotateY(0)")};
+  cursor: pointer;
+`;
+
+// Common style for both front and back of the card
+const CardSide = styled.div`
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  backface-visibility: hidden;
+  border-radius: 1rem;
+  padding: 1.25rem 1rem;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+`;
+
+// Front of the card
+const CardFront = styled(CardSide)`
+  background: linear-gradient(135deg, #232526 0%, #18191a 100%);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  
+  &:hover {
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3);
+    background: linear-gradient(135deg, #18191a 0%, #232526 100%);
+  }
+`;
+
+// Back of the card
+const CardBack = styled(CardSide)`
+  background: linear-gradient(135deg, #18191a 0%, #232526 100%);
+  transform: rotateY(180deg);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  
+  &:hover {
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3);
+  }
+`;
+
+// Updated Pokemon Card special layout for front
+const PokemonCardFront = styled(CardFront)`
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
 `;
 
 const CardLabel = styled.h2`
@@ -160,7 +221,16 @@ const CardLabel = styled.h2`
   margin-bottom: 0.5rem;
   text-align: center;
   font-weight: 600;
-  grid-area: ${props => props.gridArea || "auto"};
+`;
+
+const EngagingPrompt = styled.p`
+  font-size: 1rem;
+  color: #e0e0e0;
+  margin-top: 0.5rem;
+  text-align: center;
+  font-weight: 500;
+  letter-spacing: 0.02em;
+  opacity: 0.85;
 `;
 
 const CardValue = styled.p`
@@ -169,7 +239,6 @@ const CardValue = styled.p`
   color: #e0e0e0;
   margin-bottom: 0.75rem;
   letter-spacing: 0.03em;
-  grid-area: ${props => props.gridArea || "auto"};
 `;
 
 const CardDescription = styled.p`
@@ -177,17 +246,30 @@ const CardDescription = styled.p`
   color: #8a8d91;
   text-align: center;
   line-height: 1.4;
-  grid-area: ${props => props.gridArea || "auto"};
+  max-width: 90%;
 `;
 
+const CardFlipHint = styled.p`
+  position: absolute;
+  bottom: 0.5rem;
+  width: 100%;
+  text-align: center;
+  font-size: 0.7rem;
+  color: #8a8d91;
+  opacity: 0.7;
+  font-style: italic;
+`;
+
+// Updated Pokemon Image to be circular
 const PokemonImage = styled.img`
-  width: 3rem;
-  height: 3rem;
-  object-fit: contain;
+  width: 10rem;
+  height: 10rem;
+  object-fit: cover;
   background: rgba(0, 0, 0, 0.2);
-  border-radius: 0.5rem;
+  border-radius: 50%;
   padding: 0.25rem;
-  grid-area: ${props => props.gridArea || "auto"};
+  margin: 0.75rem 0;
+  border: 1px solid rgba(255, 255, 255, 0.1);
 `;
 
 const ProfileImage = styled.div`
@@ -329,55 +411,30 @@ const Results = () => {
   const [result, setResult] = useState(null);
   const [loading, setLoading] = useState(true);
   const [showRoast, setShowRoast] = useState(false);
+  const [flippedCards, setFlippedCards] = useState({});
   const { id } = useParams();
 
   useEffect(() => {
     const fetchData = async () => {
       try {
-        console.log("Fetching data for customId:", id);
         const backendUrl = "http://localhost:1997";
         const res = await axios.get(`${backendUrl}/api/${id}/personality`);
-        console.log("Response received:", res.data);
         setResult(res.data);
       } catch (error) {
         console.error("Fetch error:", error);
       } finally {
-        console.log("Setting loading to false");
         setLoading(false);
       }
     };
 
     if (id) fetchData();
-    else console.warn("No customId in query params!");
   }, [id]);
 
-  const toggleRoast = () => {
-    setShowRoast(!showRoast);
-  };
+  const toggleRoast = () => setShowRoast(!showRoast);
+  const toggleFlip = (key) => setFlippedCards(prev => ({ ...prev, [key]: !prev[key] }));
 
-  if (loading)
-    return (
-      <LoadingContainer>
-        <AccentCircle />
-        <AccentCircle />
-        <AccentCircle />
-        <LoadingCard>
-          <LoadingText>LOADING...</LoadingText>
-        </LoadingCard>
-      </LoadingContainer>
-    );
-
-  if (!result)
-    return (
-      <LoadingContainer>
-        <AccentCircle />
-        <AccentCircle />
-        <AccentCircle />
-        <LoadingCard>
-          <LoadingText>NO RESULT FOUND</LoadingText>
-        </LoadingCard>
-      </LoadingContainer>
-    );
+  if (loading) return <LoadingContainer><AccentCircle /><LoadingCard><LoadingText>LOADING...</LoadingText></LoadingCard></LoadingContainer>;
+  if (!result) return <LoadingContainer><AccentCircle /><LoadingCard><LoadingText>NO RESULT FOUND</LoadingText></LoadingCard></LoadingContainer>;
 
   const resultSections = [
     { label: 'Core Personality Archetype', key: 'corePersonalityArchetype', descKey: 'corePersonalityArchetypeDescription' },
@@ -394,61 +451,49 @@ const Results = () => {
   return (
     <PageContainer>
       <AccentCircle />
-      <AccentCircle />
-      <AccentCircle />
-      
-      {result.profileImage && (
-        <ProfileImage>
-          <img src={result.profileImage} alt="Profile" />
-        </ProfileImage>
-      )}
-      
+      {result.profileImage && <ProfileImage><img src={result.profileImage} alt="Profile" /></ProfileImage>}
+
       <ContentWrapper>
-        <PageTitle>VIBE_RESULTS</PageTitle>
+        <PageTitle>VIBE<TitleGlow>_</TitleGlow>RESULTS</PageTitle>
         <Description>{result.briefDescription}</Description>
-        
+        <Subtitle>Click the cards to reveal your personality profile</Subtitle>
+
         <ResultsGrid>
           {resultSections.map((item, index) => (
-            item.isPokemon ? (
-              <PokemonCard key={item.key} index={index}>
-                <CardLabel gridArea="label">{item.label}</CardLabel>
-                <CardValue gridArea="value">{result[item.key]}</CardValue>
-                
-                {result.pokemonImage && (
-                  <PokemonImage
-                    gridArea="img"
-                    src={result.pokemonImage}
-                    alt={result.pokemonName || result.pokemon}
-                  />
+            <FlipCardContainer key={item.key} index={index}>
+              <FlipCardInner isFlipped={flippedCards[item.key]} onClick={() => toggleFlip(item.key)}>
+                {item.isPokemon ? (
+                  <PokemonCardFront>
+                    <CardLabel>{item.label}</CardLabel>
+                    <EngagingPrompt>Which Pokémon are you?</EngagingPrompt>
+                    {/* Optional PokemonImage and FlipHint here */}
+                  </PokemonCardFront>
+                ) : (
+                  <CardFront>
+                    <CardLabel>{item.label}</CardLabel>
+                    <EngagingPrompt>{`Click to reveal ${item.label.toLowerCase()}`}</EngagingPrompt>
+                  </CardFront>
                 )}
-                
-                <CardDescription gridArea="desc">{result[item.descKey]}</CardDescription>
-              </PokemonCard>
-            ) : (
-              <ResultCard key={item.key} index={index}>
-                <CardLabel>{item.label}</CardLabel>
-                <CardValue>{result[item.key]}</CardValue>
-                <CardDescription>{result[item.descKey]}</CardDescription>
-              </ResultCard>
-            )
+                <CardBack>
+                  <CardLabel>{result[item.key]}</CardLabel>
+                  <CardValue>{result[item.descKey]}</CardValue>
+                  <CardFlipHint>Click to flip back</CardFlipHint>
+                </CardBack>
+              </FlipCardInner>
+            </FlipCardContainer>
           ))}
         </ResultsGrid>
-        
+
         {result.roast && (
-          <RoastButton onClick={toggleRoast}>
-            <span style={{ marginRight: '0.5rem' }}>🔥</span> Reveal Roast
-          </RoastButton>
+          <RoastButton onClick={toggleRoast}>Reveal Roast</RoastButton>
         )}
       </ContentWrapper>
-      
+
       {showRoast && (
         <ModalOverlay onClick={toggleRoast}>
           <ModalCard onClick={(e) => e.stopPropagation()}>
-            <CloseButton onClick={toggleRoast}>
-              <X size={20} />
-            </CloseButton>
-            
-            <ModalTitle>🔥 BRUTAL ROAST 🔥</ModalTitle>
+            <CloseButton onClick={toggleRoast}><X size={20} /></CloseButton>
+            <ModalTitle>Personality Roast</ModalTitle>
             <ModalText>{result.roast}</ModalText>
           </ModalCard>
         </ModalOverlay>

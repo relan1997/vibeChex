@@ -41,6 +41,8 @@ Guidelines:
 - Each question should cover one or more of the above personality types through its options.
 - Each option must reflect a different vibe from the list above.
 - Do NOT assign vibe labels in the JSON—just ensure the answers are clearly aligned in tone.
+-Dont ask direct questions like "What is your vibe?" or "How do you feel?" Instead, use creative scenarios or metaphors to elicit the vibes.
+- The questions should be relatable and engaging, like "If you were a character in a movie, which one would you be?" or "What would your ideal weekend look like?"
 - You must vary the elemental associations used in the answers. Do not always assign "air" as an element—other elements such as fire, water, ice, dust, soil, etc. must also be used creatively in different responses.
 - Do not include explanations, markdown, comments, or extra text—respond with only the raw JSON object`;
 

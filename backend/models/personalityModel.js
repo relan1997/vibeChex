@@ -14,7 +14,6 @@ const personalitySchema = new mongoose.Schema({
   element: String,
   elementDescription: String,
 
-  pokemon: String,
   pokemonDescription: String,
   pokemonName: String, // ✅ Newly added field for lowercase Pokemon name
   pokemonImage: String,

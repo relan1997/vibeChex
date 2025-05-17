@@ -8,21 +8,28 @@ Based only on the user's selected answers, analyze their personality and return 
 
 - briefDescription: a 100-word summary of the user's overall personality  
 - corePersonalityArchetype  
+- corePersonalityArchetypeDescription  
 - element  
-- pokemon (must be a real Pokémon available on PokéAPI)  
-- pokemonName (give **only** the lowercase name of the Pokémon)  
+- elementDescription  
+- pokemonName (only the lowercase name of the Pokémon, e.g., "pikachu")  
+- pokemonDescription  
 - country  
+- countryDescription  
 - aestheticStyle  
+- aestheticStyleDescription  
 - planet  
+- planetDescription  
 - timeOfDay  
+- timeOfDayDescription  
 - fictionalCharacter  
+- fictionalCharacterDescription  
 - zodiacAlignment  
+- zodiacAlignmentDescription  
 - roast
 
-STRICTLY also give 2-sentence descriptions for each of these keys, explaining how they relate to the user's personality.  
-Include emojis where appropriate.  
-The **roast** must be a 10 sentences of humorous and sarcastic jab at the user's character, based on the personality analysiswi with known weaknesses, having a deeper hidden meaning with respect to real life.  
-It should be clever, slightly savage and offensive. Feel free to creatively exaggerate.
+For each key (except pokemonName), also provide a **2-sentence** description explaining how it relates to the user's personality. Use emojis where appropriate to enhance the tone.
+
+The **roast** must be a **10-sentence** clever, slightly savage, and sarcastic takedown of the user's character. It should exaggerate known flaws humorously, reflect deeper psychological insights, and mirror real-life behaviors with brutal honesty. Make it smart, edgy, and entertaining.
 
 Respond with **only** the JSON object and nothing else.
   `;

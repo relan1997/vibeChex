@@ -86,91 +86,120 @@ app.post("/api/:id/generate", async (req, res) => {
 });
 
 app.post("/api/:id/result", async (req, res) => {
+  console.log("🔵 [Start] Generating personality result for ID:", req.params.id);
+
   try {
     const userAnswers = req.body.answers;
     if (!Array.isArray(userAnswers)) {
-      return res.status(400).json({ error: "Invalid input format" });
+      console.error("🟥 Invalid input: answers is not an array.");
+      return res.status(400).json({ error: "Invalid input format: answers should be an array." });
     }
 
-    const questionPrompt = buildPrompt(userAnswers);
-    const model = genAI.getGenerativeModel({ model: "gemini-2.0-flash" });
+    console.log("🟢 Received user answers:", userAnswers);
 
-    const result = await model.generateContent(questionPrompt);
-    const response = result.response;
-    const text = response.text();
+    let questionPrompt;
+    try {
+      questionPrompt = buildPrompt(userAnswers);
+      console.log("🟢 Built question prompt.");
+    } catch (err) {
+      console.error("🟥 Failed to build prompt:", err);
+      return res.status(500).json({ error: "Failed to build question prompt." });
+    }
 
-    const json = extractJsonFromMarkdown(text);
+    let text;
+    try {
+      const model = genAI.getGenerativeModel({ model: "gemini-2.0-flash" });
+      const result = await model.generateContent(questionPrompt);
+      text = result.response?.text?.();
+      if (!text) throw new Error("Empty AI response");
+      console.log("🟢 Received AI response.");
+    } catch (err) {
+      console.error("🟥 Error generating content from model:", err);
+      return res.status(500).json({ error: "AI model failed to generate content." });
+    }
+
+    let json;
+    try {
+      json = extractJsonFromMarkdown(text);
+      console.log("🟢 Extracted JSON from AI response:", json);
+    } catch (err) {
+      console.error("🟥 Error extracting JSON from markdown:", err);
+      return res.status(500).json({ error: "Failed to parse AI response." });
+    }
 
     if (
       !json ||
       !json.briefDescription ||
-      !json.pokemon ||
       !json.pokemonName ||
-      !json.roast // ✅ Ensure roast is present
+      !json.pokemonDescription ||
+      !json.roast
     ) {
-      return res
-        .status(500)
-        .json({ error: "Failed to parse personality result" });
+      console.error("🟥 AI response missing required fields:", json);
+      return res.status(500).json({ error: "Incomplete AI result. Missing one or more required fields." });
     }
 
     const lastAnswer = userAnswers[userAnswers.length - 1]?.selectedOption;
     if (!lastAnswer) {
-      return res.status(400).json({ error: "Missing final answer (animal)" });
+      console.error("🟥 Missing last answer (animal).");
+      return res.status(400).json({ error: "Missing final answer (animal)." });
     }
 
-    // Get Pokémon name and image
-    const rawPokemonName = json.pokemon;
-    const pokemonName = json.pokemonName
-      .toLowerCase()
-      .replace(/\s/g, "-")
-      .replace(/[^a-z0-9-]/g, "");
-    let imageUrl = `https://img.pokemondb.net/artwork/large/${pokemonName}.jpg`;
+    let imageUrl;
+    try {
+      const rawPokemonName = json.pokemonName;
+      const pokemonNameSlug = rawPokemonName.toLowerCase().replace(/\s/g, "-").replace(/[^a-z0-9-]/g, "");
+      imageUrl = `https://img.pokemondb.net/artwork/large/${pokemonNameSlug}.jpg`;
+      console.log("🟢 Constructed initial image URL:", imageUrl);
 
-    console.log("Raw Pokémon:", rawPokemonName);
-    console.log("Provided Pokémon name:", json.pokemonName);
-    console.log("Formatted Pokémon name:", pokemonName);
-    console.log("Image URL:", imageUrl);
-
-    // Check if image exists
-    const exists = await checkImageExists(imageUrl);
-    if (!exists) {
-      const validName = await validatePokemon(rawPokemonName);
-      if (validName) {
-        const safeName = validName
-          .toLowerCase()
-          .replace(/\s/g, "-")
-          .replace(/[^a-z0-9-]/g, "");
-        imageUrl = `https://img.pokemondb.net/artwork/large/${safeName}.jpg`;
-      } else {
-        imageUrl = "https://img.pokemondb.net/artwork/large/missingno.jpg"; // fallback
+      const exists = await checkImageExists(imageUrl);
+      if (!exists) {
+        console.warn("⚠️ Initial Pokémon image not found, trying fallback...");
+        const validName = await validatePokemon(rawPokemonName);
+        if (validName) {
+          const safeName = validName.toLowerCase().replace(/\s/g, "-").replace(/[^a-z0-9-]/g, "");
+          imageUrl = `https://img.pokemondb.net/artwork/large/${safeName}.jpg`;
+          console.log("🟢 Fallback image URL found:", imageUrl);
+        } else {
+          imageUrl = "https://img.pokemondb.net/artwork/large/missingno.jpg";
+          console.warn("⚠️ Pokémon not valid, using missingno image.");
+        }
       }
+    } catch (err) {
+      console.error("🟥 Error validating or constructing image URL:", err);
+      return res.status(500).json({ error: "Failed to fetch Pokémon image." });
     }
 
-    // Store everything in DB
-    await personalityModel.findOneAndUpdate(
-      { customId: req.params.id },
-      {
-        customId: req.params.id,
-        ...json,
-        pokemonImage: imageUrl,
-        pokemonName: pokemonName,
-      },
-      { upsert: true, new: true, overwrite: true }
-    );
+    try {
+      const saved = await personalityModel.findOneAndUpdate(
+        { customId: req.params.id },
+        {
+          customId: req.params.id,
+          ...json,
+          pokemonImage: imageUrl,
+          pokemonName: json.pokemonName.toLowerCase(),
+        },
+        { upsert: true, new: true, overwrite: true }
+      );
+      console.log("🟢 Saved personality result to DB:", saved);
+    } catch (err) {
+      console.error("🟥 Error saving personality result to DB:", err);
+      return res.status(500).json({ error: "Failed to save result to database." });
+    }
 
     res.json({
       message: "Personality result saved successfully.",
       personality: {
         ...json,
         pokemonImage: imageUrl,
-        pokemonName: pokemonName,
+        pokemonName: json.pokemonName.toLowerCase(),
       },
     });
   } catch (err) {
-    console.error("Error generating or saving personality result:", err);
+    console.error("🟥 Unexpected error in endpoint:", err);
     res.status(500).json({ error: "Internal server error" });
   }
 });
+
 
 
 app.get("/api/:id/personality", async (req, res) => {
