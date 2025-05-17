@@ -27,7 +27,7 @@ Based only on the user's selected answers, analyze their personality and return 
 - zodiacAlignmentDescription  
 - roast
 
-For each key (except pokemonName), also provide a **2-sentence** description explaining how it relates to the user's personality. Use emojis where appropriate to enhance the tone.
+For each key (except pokemonName), also provide a **1-sentence** description explaining how it relates to the user's personality. Use emojis where appropriate to enhance the tone.
 
 The **roast** must be a **10-sentence** clever, slightly savage, and sarcastic takedown of the user's character. It should exaggerate known flaws humorously, reflect deeper psychological insights, and mirror real-life behaviors with brutal honesty. Make it smart, edgy, and entertaining.
 
