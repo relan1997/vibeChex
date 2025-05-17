@@ -8,7 +8,6 @@ import extractJsonFromMarkdown from "./helpers/extractJsonFromMarkdown.js";
 import questionPrompt from "./prompts/questionPrompt.js";
 import buildPrompt from "./prompts/buildPrompt.js";
 import personalityModel from "./models/personalityModel.js";
-import axios from "axios";
 import checkImageExists from "./helpers/checkImageExists.js";
 import validatePokemon from "./helpers/validatePokemon.js";
 
@@ -23,10 +22,7 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 
-
-
 // Utility to validate Pokemon via PokeAPI
-
 
 app.post("/api/:id/generate", async (req, res) => {
   try {
@@ -86,13 +82,18 @@ app.post("/api/:id/generate", async (req, res) => {
 });
 
 app.post("/api/:id/result", async (req, res) => {
-  console.log("🔵 [Start] Generating personality result for ID:", req.params.id);
+  console.log(
+    "🔵 [Start] Generating personality result for ID:",
+    req.params.id
+  );
 
   try {
     const userAnswers = req.body.answers;
     if (!Array.isArray(userAnswers)) {
       console.error("🟥 Invalid input: answers is not an array.");
-      return res.status(400).json({ error: "Invalid input format: answers should be an array." });
+      return res
+        .status(400)
+        .json({ error: "Invalid input format: answers should be an array." });
     }
 
     console.log("🟢 Received user answers:", userAnswers);
@@ -103,7 +104,9 @@ app.post("/api/:id/result", async (req, res) => {
       console.log("🟢 Built question prompt.");
     } catch (err) {
       console.error("🟥 Failed to build prompt:", err);
-      return res.status(500).json({ error: "Failed to build question prompt." });
+      return res
+        .status(500)
+        .json({ error: "Failed to build question prompt." });
     }
 
     let text;
@@ -115,7 +118,9 @@ app.post("/api/:id/result", async (req, res) => {
       console.log("🟢 Received AI response.");
     } catch (err) {
       console.error("🟥 Error generating content from model:", err);
-      return res.status(500).json({ error: "AI model failed to generate content." });
+      return res
+        .status(500)
+        .json({ error: "AI model failed to generate content." });
     }
 
     let json;
@@ -135,7 +140,11 @@ app.post("/api/:id/result", async (req, res) => {
       !json.roast
     ) {
       console.error("🟥 AI response missing required fields:", json);
-      return res.status(500).json({ error: "Incomplete AI result. Missing one or more required fields." });
+      return res
+        .status(500)
+        .json({
+          error: "Incomplete AI result. Missing one or more required fields.",
+        });
     }
 
     const lastAnswer = userAnswers[userAnswers.length - 1]?.selectedOption;
@@ -147,7 +156,10 @@ app.post("/api/:id/result", async (req, res) => {
     let imageUrl;
     try {
       const rawPokemonName = json.pokemonName;
-      const pokemonNameSlug = rawPokemonName.toLowerCase().replace(/\s/g, "-").replace(/[^a-z0-9-]/g, "");
+      const pokemonNameSlug = rawPokemonName
+        .toLowerCase()
+        .replace(/\s/g, "-")
+        .replace(/[^a-z0-9-]/g, "");
       imageUrl = `https://img.pokemondb.net/artwork/large/${pokemonNameSlug}.jpg`;
       console.log("🟢 Constructed initial image URL:", imageUrl);
 
@@ -156,7 +168,10 @@ app.post("/api/:id/result", async (req, res) => {
         console.warn("⚠️ Initial Pokémon image not found, trying fallback...");
         const validName = await validatePokemon(rawPokemonName);
         if (validName) {
-          const safeName = validName.toLowerCase().replace(/\s/g, "-").replace(/[^a-z0-9-]/g, "");
+          const safeName = validName
+            .toLowerCase()
+            .replace(/\s/g, "-")
+            .replace(/[^a-z0-9-]/g, "");
           imageUrl = `https://img.pokemondb.net/artwork/large/${safeName}.jpg`;
           console.log("🟢 Fallback image URL found:", imageUrl);
         } else {
@@ -183,7 +198,9 @@ app.post("/api/:id/result", async (req, res) => {
       console.log("🟢 Saved personality result to DB:", saved);
     } catch (err) {
       console.error("🟥 Error saving personality result to DB:", err);
-      return res.status(500).json({ error: "Failed to save result to database." });
+      return res
+        .status(500)
+        .json({ error: "Failed to save result to database." });
     }
 
     res.json({
@@ -199,8 +216,6 @@ app.post("/api/:id/result", async (req, res) => {
     res.status(500).json({ error: "Internal server error" });
   }
 });
-
-
 
 app.get("/api/:id/personality", async (req, res) => {
   try {

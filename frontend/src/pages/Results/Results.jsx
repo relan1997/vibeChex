@@ -10,6 +10,29 @@ const gradient = keyframes`
   100% { background-position: 100% 50%; }
 `;
 
+const CopyLinkButton = styled.button`
+  background: linear-gradient(90deg, #232526 0%, #18191a 100%);
+  color: #e0e0e0;
+  font-weight: bold;
+  padding: 0.8rem 2.5rem;
+  border: none;
+  border-radius: 999px;
+  font-size: 1.1rem;
+  cursor: pointer;
+  box-shadow: 0 4px 24px 0 #23252680, 0 0 0 0 #bfc1c2;
+  transition: box-shadow 0.2s, background 0.3s, color 0.3s, transform 0.2s;
+  outline: none;
+  margin-top: 2rem;
+  z-index: 1;
+
+  &:hover {
+    background: linear-gradient(90deg, #18191a 0%, #232526 100%);
+    color: #bfc1c2;
+    box-shadow: 0 0 36px 6px #bfc1c240;
+    transform: translateY(-2px) scale(1.04);
+  }
+`;
+
 const Float = keyframes`
   0% { transform: translateY(0) scale(1);}
   50% { transform: translateY(-30px) scale(1.07);}
@@ -42,21 +65,27 @@ const AccentCircle = styled.div`
   animation: ${Float} 8s ease-in-out infinite;
 
   &:nth-child(1) {
-    width: 420px; height: 420px;
+    width: 420px;
+    height: 420px;
     background: #3a3f47;
-    top: -120px; left: -140px;
+    top: -120px;
+    left: -140px;
     animation-delay: 0s;
   }
   &:nth-child(2) {
-    width: 260px; height: 260px;
+    width: 260px;
+    height: 260px;
     background: #bfc1c2;
-    bottom: 80px; right: -100px;
+    bottom: 80px;
+    right: -100px;
     animation-delay: 3s;
   }
   &:nth-child(3) {
-    width: 180px; height: 180px;
+    width: 180px;
+    height: 180px;
     background: #232526;
-    top: 60%; left: 10vw;
+    top: 60%;
+    left: 10vw;
     animation-delay: 5s;
   }
 `;
@@ -77,10 +106,10 @@ const PageTitle = styled.h1`
   letter-spacing: 0.1em;
   margin-bottom: 0.5rem;
   color: #000000;
-  text-shadow: 0 1.5px 8px rgba(255,255,255.10), 0 1px 0 #18191a;
+  text-shadow: 0 1.5px 8px rgba(255, 255, 255.1), 0 1px 0 #18191a;
   text-align: center;
   transition: font-size 0.2s;
-  
+
   @media (max-width: 900px) {
     font-size: 2.5rem;
   }
@@ -104,7 +133,7 @@ const Description = styled.p`
   font-weight: 400;
   letter-spacing: 0.01em;
   padding: 0 1rem;
-  
+
   @media (max-width: 600px) {
     font-size: 0.92rem;
   }
@@ -119,7 +148,7 @@ const Subtitle = styled.h2`
   text-align: center;
   transition: font-size 0.2s;
   opacity: 0.9;
-  
+
   @media (max-width: 600px) {
     font-size: 1.2rem;
   }
@@ -130,7 +159,7 @@ const ResultsGrid = styled.div`
   grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
   gap: 1rem;
   width: 100%;
-  
+
   @media (min-width: 768px) {
     grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
   }
@@ -145,11 +174,11 @@ const popIn = keyframes`
 const FlipCardContainer = styled.div`
   perspective: 1000px;
   animation: ${popIn} 0.5s ease-out forwards;
-  animation-delay: ${props => props.index * 0.1}s;
+  animation-delay: ${(props) => props.index * 0.1}s;
   opacity: 0;
   height: 230px;
   transition: transform 0.3s ease;
-  
+
   &:hover {
     transform: translateY(-5px);
   }
@@ -163,7 +192,7 @@ const FlipCardInner = styled.div`
   text-align: center;
   transition: transform 0.8s cubic-bezier(0.175, 0.885, 0.32, 1.275);
   transform-style: preserve-3d;
-  transform: ${props => (props.isFlipped ? "rotateY(180deg)" : "rotateY(0)")};
+  transform: ${(props) => (props.isFlipped ? "rotateY(180deg)" : "rotateY(0)")};
   cursor: pointer;
 `;
 
@@ -186,7 +215,7 @@ const CardSide = styled.div`
 const CardFront = styled(CardSide)`
   background: linear-gradient(135deg, #232526 0%, #18191a 100%);
   border: 1px solid rgba(255, 255, 255, 0.05);
-  
+
   &:hover {
     box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3);
     background: linear-gradient(135deg, #18191a 0%, #232526 100%);
@@ -198,7 +227,7 @@ const CardBack = styled(CardSide)`
   background: linear-gradient(135deg, #18191a 0%, #232526 100%);
   transform: rotateY(180deg);
   border: 1px solid rgba(255, 255, 255, 0.1);
-  
+
   &:hover {
     box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3);
   }
@@ -284,7 +313,7 @@ const ProfileImage = styled.div`
   overflow: hidden;
   z-index: 10;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
-  
+
   img {
     width: 100%;
     height: 100%;
@@ -354,6 +383,29 @@ const ModalTitle = styled.h2`
   font-weight: 700;
 `;
 
+const TwitterButton = styled.button`
+  background: linear-gradient(90deg, #232526 0%, #18191a 100%);
+  color: #e0e0e0;
+  font-weight: bold;
+  padding: 0.8rem 2.5rem;
+  border: none;
+  border-radius: 999px;
+  font-size: 1.1rem;
+  cursor: pointer;
+  box-shadow: 0 4px 24px 0 #23252680, 0 0 0 0 #bfc1c2;
+  transition: box-shadow 0.2s, background 0.3s, color 0.3s, transform 0.2s;
+  outline: none;
+  margin-top: 1rem;
+  z-index: 1;
+
+  &:hover {
+    background: linear-gradient(90deg, #18191a 0%, #232526 100%);
+    color: #bfc1c2;
+    box-shadow: 0 0 36px 6px #bfc1c240;
+    transform: translateY(-2px) scale(1.04);
+  }
+`;
+
 const ModalText = styled.p`
   color: #bfc1c2;
   font-style: italic;
@@ -373,7 +425,7 @@ const CloseButton = styled.button`
   cursor: pointer;
   padding: 0.25rem;
   transition: color 0.2s;
-  
+
   &:hover {
     color: #e0e0e0;
   }
@@ -419,6 +471,7 @@ const Results = () => {
       try {
         const backendUrl = "http://localhost:1997";
         const res = await axios.get(`${backendUrl}/api/${id}/personality`);
+        console.log("Fetched data:", res.data);
         setResult(res.data);
       } catch (error) {
         console.error("Fetch error:", error);
@@ -431,68 +484,169 @@ const Results = () => {
   }, [id]);
 
   const toggleRoast = () => setShowRoast(!showRoast);
-  const toggleFlip = (key) => setFlippedCards(prev => ({ ...prev, [key]: !prev[key] }));
+  const toggleFlip = (key) =>
+    setFlippedCards((prev) => ({ ...prev, [key]: !prev[key] }));
 
-  if (loading) return <LoadingContainer><AccentCircle /><LoadingCard><LoadingText>LOADING...</LoadingText></LoadingCard></LoadingContainer>;
-  if (!result) return <LoadingContainer><AccentCircle /><LoadingCard><LoadingText>NO RESULT FOUND</LoadingText></LoadingCard></LoadingContainer>;
+  if (loading)
+    return (
+      <LoadingContainer>
+        <AccentCircle />
+        <LoadingCard>
+          <LoadingText>LOADING...</LoadingText>
+        </LoadingCard>
+      </LoadingContainer>
+    );
+  if (!result)
+    return (
+      <LoadingContainer>
+        <AccentCircle />
+        <LoadingCard>
+          <LoadingText>NO RESULT FOUND</LoadingText>
+        </LoadingCard>
+      </LoadingContainer>
+    );
 
-  const resultSections = [
-    { label: 'Core Personality Archetype', key: 'corePersonalityArchetype', descKey: 'corePersonalityArchetypeDescription' },
-    { label: 'Element', key: 'element', descKey: 'elementDescription' },
-    { label: 'Pokemon', key: 'pokemon', descKey: 'pokemonDescription', isPokemon: true },
-    { label: 'Country', key: 'country', descKey: 'countryDescription' },
-    { label: 'Aesthetic Style', key: 'aestheticStyle', descKey: 'aestheticStyleDescription' },
-    { label: 'Planet', key: 'planet', descKey: 'planetDescription' },
-    { label: 'Time of Day', key: 'timeOfDay', descKey: 'timeOfDayDescription' },
-    { label: 'Fictional Character', key: 'fictionalCharacter', descKey: 'fictionalCharacterDescription' },
-    { label: 'Zodiac Alignment', key: 'zodiacAlignment', descKey: 'zodiacAlignmentDescription' },
+const resultSections = [
+    {
+      label: "Core Personality Archetype",
+      key: "corePersonalityArchetype",
+      descKey: "corePersonalityArchetypeDescription",
+    },
+    { label: "Element", key: "element", descKey: "elementDescription" },
+    {
+      label: "Pokemon",
+      key: "pokemon",
+      descKey: "pokemon", // Just show the Pokemon name here
+      isPokemon: true,
+      imageUrl: result.pokemonImage, // Add the image URL
+      pokemonName: result.pokemonName, // Add the Pokemon name
+    },
+    { label: "Country", key: "country", descKey: "countryDescription" },
+    {
+      label: "Aesthetic Style",
+      key: "aestheticStyle",
+      descKey: "aestheticStyleDescription",
+    },
+    { label: "Planet", key: "planet", descKey: "planetDescription" },
+    { 
+      label: "Pokemon Description",
+      key: "pokemonDesc",
+      descKey: "pokemonDescription", // Add a dedicated card for Pokemon description
+    },
+    { label: "Time of Day", key: "timeOfDay", descKey: "timeOfDayDescription" },
+    {
+      label: "Fictional Character",
+      key: "fictionalCharacter",
+      descKey: "fictionalCharacterDescription",
+    },
+    {
+      label: "Zodiac Alignment",
+      key: "zodiacAlignment",
+      descKey: "zodiacAlignmentDescription",
+    },
   ];
 
   return (
     <PageContainer>
       <AccentCircle />
-      {result.profileImage && <ProfileImage><img src={result.profileImage} alt="Profile" /></ProfileImage>}
+      <AccentCircle />
+      <AccentCircle />
+      {result.profileImage && (
+        <ProfileImage>
+          <img src={result.profileImage} alt="Profile" />
+        </ProfileImage>
+      )}
 
       <ContentWrapper>
-        <PageTitle>VIBE<TitleGlow>_</TitleGlow>RESULTS</PageTitle>
+        <PageTitle>
+          VIBE<TitleGlow>_</TitleGlow>RESULTS
+        </PageTitle>
         <Description>{result.briefDescription}</Description>
         <Subtitle>Click the cards to reveal your personality profile</Subtitle>
 
         <ResultsGrid>
-          {resultSections.map((item, index) => (
-            <FlipCardContainer key={item.key} index={index}>
-              <FlipCardInner isFlipped={flippedCards[item.key]} onClick={() => toggleFlip(item.key)}>
-                {item.isPokemon ? (
-                  <PokemonCardFront>
-                    <CardLabel>{item.label}</CardLabel>
-                    <EngagingPrompt>Which Pokémon are you?</EngagingPrompt>
-                    {/* Optional PokemonImage and FlipHint here */}
-                  </PokemonCardFront>
-                ) : (
-                  <CardFront>
-                    <CardLabel>{item.label}</CardLabel>
-                    <EngagingPrompt>{`Click to reveal ${item.label.toLowerCase()}`}</EngagingPrompt>
-                  </CardFront>
-                )}
-                <CardBack>
-                  <CardLabel>{result[item.key]}</CardLabel>
-                  <CardValue>{result[item.descKey]}</CardValue>
-                  <CardFlipHint>Click to flip back</CardFlipHint>
-                </CardBack>
-              </FlipCardInner>
-            </FlipCardContainer>
-          ))}
-        </ResultsGrid>
-
-        {result.roast && (
-          <RoastButton onClick={toggleRoast}>Reveal Roast</RoastButton>
+  {resultSections.map((item, index) => (
+    <FlipCardContainer key={item.key} index={index}>
+      <FlipCardInner
+        isFlipped={flippedCards[item.key]}
+        onClick={() => toggleFlip(item.key)}
+      >
+        {item.isPokemon ? (
+          <PokemonCardFront>
+            <CardLabel>{item.label}</CardLabel>
+            <EngagingPrompt>Your Pokemon companion is:</EngagingPrompt>
+          </PokemonCardFront>
+        ) : (
+          <CardFront>
+            <CardLabel>{item.label}</CardLabel>
+            <EngagingPrompt>{`Click to reveal ${item.label.toLowerCase()}`}</EngagingPrompt>
+          </CardFront>
         )}
+        <CardBack>
+          {item.isPokemon ? (
+            <>
+              <CardLabel>{result.pokemonName.charAt(0).toUpperCase() + result.pokemonName.slice(1)}</CardLabel>
+              <CardValue>{result[item.descKey]}</CardValue>
+              {item.imageUrl && <PokemonImage src={item.imageUrl} alt={result.pokemonName} />}
+            </>
+          ) : (
+            <>
+              <CardLabel>{item.key === "pokemonDesc" ? "Pokemon Traits" : result[item.key]}</CardLabel>
+              <CardValue>{result[item.descKey]}</CardValue>
+              {item.imageUrl && <PokemonImage src={item.imageUrl} alt={result[item.key]} />}
+            </>
+          )}
+        </CardBack>
+      </FlipCardInner>
+    </FlipCardContainer>
+  ))}
+</ResultsGrid>
+
+        <div style={{ 
+          display: 'flex', 
+          flexDirection: 'row', 
+          justifyContent: 'center', 
+          gap: '1rem', 
+          marginTop: '2rem',
+          flexWrap: 'wrap' 
+        }}>
+          <CopyLinkButton
+            onClick={() => {
+              navigator.clipboard.writeText(window.location.href);
+              alert("Link copied to clipboard!");
+            }}
+          >
+            Copy Sharable Link
+          </CopyLinkButton>
+
+          {result.roast && (
+            <RoastButton onClick={toggleRoast}>Reveal Roast</RoastButton>
+          )}
+
+          <TwitterButton
+            onClick={() => {
+              const text = encodeURIComponent(
+                "Check out my personality vibe results! 🔮👇"
+              );
+              const url = encodeURIComponent(window.location.href);
+              const hashtags = "personalitytest,vibes,results";
+              window.open(
+                `https://twitter.com/intent/tweet?text=${text}&url=${url}&hashtags=${hashtags}`,
+                "_blank"
+              );
+            }}
+          >
+            Share on Twitter
+          </TwitterButton>
+        </div>
       </ContentWrapper>
 
       {showRoast && (
         <ModalOverlay onClick={toggleRoast}>
           <ModalCard onClick={(e) => e.stopPropagation()}>
-            <CloseButton onClick={toggleRoast}><X size={20} /></CloseButton>
+            <CloseButton onClick={toggleRoast}>
+              <X size={20} />
+            </CloseButton>
             <ModalTitle>Personality Roast</ModalTitle>
             <ModalText>{result.roast}</ModalText>
           </ModalCard>
