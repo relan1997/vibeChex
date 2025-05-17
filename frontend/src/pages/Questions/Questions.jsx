@@ -47,12 +47,12 @@ const Questions = () => {
 
   const handleRadioChange = (questionIndex, value) => {
     setAnswers((prev) => ({ ...prev, [questionIndex]: value }));
-    setCustomAnswers((prev) => ({ ...prev, [questionIndex]: "" })); // Clear other input
+    setCustomAnswers((prev) => ({ ...prev, [questionIndex]: "" }));
   };
 
   const handleCustomInput = (questionIndex, value) => {
     setCustomAnswers((prev) => ({ ...prev, [questionIndex]: value }));
-    setAnswers((prev) => ({ ...prev, [questionIndex]: "" })); // Clear radio selection
+    setAnswers((prev) => ({ ...prev, [questionIndex]: "" }));
   };
 
   const handleSubmit = async () => {
@@ -75,7 +75,7 @@ const Questions = () => {
     });
 
     try {
-      setSubmitLoading(true); // start loading
+      setSubmitLoading(true);
 
       const res = await fetch(`http://localhost:1997/api/${id}/result`, {
         method: "POST",
@@ -87,15 +87,13 @@ const Questions = () => {
         throw new Error(`Server error: ${res.status} ${res.statusText}`);
       }
 
-      const data = await res.json();
-
-      // Only navigate after success
+      await res.json();
       navigate(`/${id}/results`);
     } catch (err) {
       console.error("Error submitting answers:", err);
       alert("Something went wrong while submitting your answers.");
     } finally {
-      setSubmitLoading(false); // stop loading no matter what
+      setSubmitLoading(false);
     }
   };
 
@@ -103,7 +101,7 @@ const Questions = () => {
   if (error) return <div>Error: {error}</div>;
 
   return (
-    <div>
+    <div style={{ maxWidth: "800px", margin: "0 auto", padding: "1rem" }}>
       <h1>Questions</h1>
       {questions.length === 0 ? (
         <p>No questions available</p>
@@ -114,14 +112,20 @@ const Questions = () => {
             const isRadioSelected = !!answers[index];
 
             return (
-              <div key={index}>
+              <div key={index} style={{ marginBottom: "2rem" }}>
                 <p>
                   {index + 1}. {q.questionText}
                 </p>
 
-                {q.options?.map((opt, i) => (
-                  <div key={i}>
-                    <label>
+                <div
+                  style={{
+                    display: "grid",
+                    gridTemplateColumns: "1fr 1fr",
+                    gap: "0.5rem",
+                  }}
+                >
+                  {q.options?.map((opt, i) => (
+                    <label key={i} style={{ display: "flex", alignItems: "center" }}>
                       <input
                         type="radio"
                         name={`question-${index}`}
@@ -129,24 +133,27 @@ const Questions = () => {
                         checked={answers[index] === opt}
                         onChange={() => handleRadioChange(index, opt)}
                         disabled={isCustomFilled}
+                        style={{ marginRight: "0.5rem" }}
                       />
                       {opt}
                     </label>
-                  </div>
-                ))}
+                  ))}
+                </div>
 
-                <div>
+                <div style={{ marginTop: "0.5rem" }}>
                   <label>
                     Other:
                     <input
                       type="text"
                       value={customAnswers[index] || ""}
-                      onChange={(e) => handleCustomInput(index, e.target.value)}
+                      onChange={(e) =>
+                        handleCustomInput(index, e.target.value)
+                      }
                       disabled={isRadioSelected}
+                      style={{ marginLeft: "0.5rem", width: "60%" }}
                     />
                   </label>
                 </div>
-
                 <hr />
               </div>
             );
@@ -159,11 +166,21 @@ const Questions = () => {
               value={favAnimal}
               onChange={(e) => setFavAnimal(e.target.value)}
               placeholder="Type your answer here"
+              style={{ width: "60%" }}
             />
             <hr />
           </div>
 
-          <button onClick={handleSubmit} disabled={submitLoading}>
+          <button
+            onClick={handleSubmit}
+            disabled={submitLoading}
+            style={{
+              padding: "0.5rem 1rem",
+              fontSize: "1rem",
+              cursor: "pointer",
+              marginTop: "1rem",
+            }}
+          >
             {submitLoading ? "Submitting..." : "Submit"}
           </button>
         </>

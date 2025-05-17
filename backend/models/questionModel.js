@@ -7,7 +7,7 @@ const questionSchema = new mongoose.Schema({
   },
   options: {
     type: [String],
-    validate: [arr => arr.length === 4, 'Each question must have exactly 4 options'],
+    validate: [arr => arr.length === 8, 'Each question must have exactly 8 options'],
     required: true,
   }
 });
@@ -20,7 +20,7 @@ const questionsModelSchema = new mongoose.Schema({
   },
   questions: {
     type: [questionSchema],
-    validate: [arr => arr.length === 12, 'There must be exactly 12 questions'],
+    validate: [arr => arr.length === 15, 'There must be exactly 12 questions'],
     required: true,
   }
 });
