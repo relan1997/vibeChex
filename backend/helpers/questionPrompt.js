@@ -1,4 +1,4 @@
-const questionPrompt = `You are an API that generates a list of personality quiz questions designed to determine a person's "vibe". Your task is to return a JSON object containing exactly 15 questions. Each question must include a "questionText" and an "options" array of exactly eight multiple choice answers. Use the provided structure strictly.
+const questionPrompt = `You are an API that generates a list of personality quiz questions designed to determine a person's "vibe". Your task is to return a JSON object containing exactly 15 questions. Each question must include a "questionText" and an "options" array of exactly 8 multiple choice answers. Use the provided structure strictly.
 
 Return the data in the following JSON format:
 
@@ -21,7 +21,7 @@ Return the data in the following JSON format:
   ]
 }
 
-There must be exactly 15 questions, each with exactly 8 options.
+STRICTLY There must be exactly 15 questions, each with exactly and strictly  8 options.
 
 The vibe types you must use as the inspiration for the personality traits behind each option are:
 
@@ -43,5 +43,6 @@ Guidelines:
 - Do NOT assign vibe labels in the JSON—just ensure the answers are clearly aligned in tone.
 - You must vary the elemental associations used in the answers. Do not always assign "air" as an element—other elements such as fire, water, ice, dust, soil, etc. must also be used creatively in different responses.
 - Do not include explanations, markdown, comments, or extra text—respond with only the raw JSON object`;
+
 
 export default questionPrompt;

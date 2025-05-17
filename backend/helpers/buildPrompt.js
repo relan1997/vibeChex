@@ -9,17 +9,19 @@ Based only on the user's selected answers, analyze their personality and return 
 - briefDescription: a 200-word summary of the user's overall personality
 - corePersonalityArchetype
 - element
-- pokemon
+- pokemon (must be a real Pokémon available on PokéAPI)
+- pokemonName (give **only** the lowercase name of the Pokémon)
 - country
 - aestheticStyle
 - planet
 - timeOfDay
 - fictionalCharacter
 - zodiacAlignment
-Strictly Also give 1-2 sentence descriptions for each of these keys, explaining how they relate to the user's personality.
-Give me emojis where appropriate.
+
+STRICTLY also give 2-sentence descriptions for each of these keys, explaining how they relate to the user's personality.
+Include emojis where appropriate.
 Respond with **only** the JSON object and nothing else.
-`;
+  `;
 }
 
 export default buildPrompt;

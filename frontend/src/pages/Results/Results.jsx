@@ -47,7 +47,12 @@ const Results = () => {
       {[
         { label: 'Core Personality Archetype', key: 'corePersonalityArchetype', descKey: 'corePersonalityArchetypeDescription' },
         { label: 'Element', key: 'element', descKey: 'elementDescription' },
-        { label: 'Pokemon', key: 'pokemon', descKey: 'pokemonDescription' },
+        {
+          label: 'Pokemon',
+          key: 'pokemon',
+          descKey: 'pokemonDescription',
+          isPokemon: true,
+        },
         { label: 'Country', key: 'country', descKey: 'countryDescription' },
         { label: 'Aesthetic Style', key: 'aestheticStyle', descKey: 'aestheticStyleDescription' },
         { label: 'Planet', key: 'planet', descKey: 'planetDescription' },
@@ -56,9 +61,21 @@ const Results = () => {
         { label: 'Zodiac Alignment', key: 'zodiacAlignment', descKey: 'zodiacAlignmentDescription' },
       ].map((item) => (
         <div key={item.key} className="mb-6">
-          <h2 className="text-xl font-semibold">
+          <h2 className="text-xl font-semibold mb-2">
             {item.label}: {result[item.key]}
           </h2>
+          {item.isPokemon && result.pokemonImage && (
+            <div className="mb-2">
+              <img
+                src={result.pokemonImage}
+                alt={result.pokemonName || result.pokemon}
+                className="w-40 h-40 object-contain"
+              />
+              {result.pokemonName && (
+                <p className="text-sm text-gray-500 mt-1">Pokémon ID: {result.pokemonName}</p>
+              )}
+            </div>
+          )}
           <p className="text-gray-600">{result[item.descKey]}</p>
         </div>
       ))}

@@ -21,6 +21,29 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 
+const checkImageExists = async (url) => {
+  try {
+    const res = await fetch(url, { method: "HEAD" });
+    return res.ok;
+  } catch {
+    return false;
+  }
+};
+
+// Utility to validate Pokemon via PokeAPI
+const validatePokemon = async (name) => {
+  const formatted = name.toLowerCase().replace(/[^a-z0-9-]/g, "-");
+  try {
+    const res = await fetch(`https://pokeapi.co/api/v2/pokemon/${formatted}`);
+    if (res.ok) {
+      return formatted;
+    }
+  } catch (err) {
+    console.warn("PokéAPI validation failed:", err);
+  }
+  return null;
+};
+
 app.post("/api/:id/generate", async (req, res) => {
   try {
     const { id } = req.params;
@@ -41,6 +64,7 @@ app.post("/api/:id/generate", async (req, res) => {
     const response = result.response;
     const text = response.text();
     const json = extractJsonFromMarkdown(text);
+    console.log("AI response:", json);
 
     if (!json.questions || !Array.isArray(json.questions)) {
       return res.status(500).json({ error: "Invalid AI response format" });
@@ -93,42 +117,80 @@ app.post("/api/:id/result", async (req, res) => {
 
     const json = extractJsonFromMarkdown(text);
 
-    if (!json || !json.briefDescription) {
-      return res.status(500).json({ error: "Failed to parse personality result" });
+    if (!json || !json.briefDescription || !json.pokemon || !json.pokemonName) {
+      return res
+        .status(500)
+        .json({ error: "Failed to parse personality result" });
     }
 
     const lastAnswer = userAnswers[userAnswers.length - 1]?.selectedOption;
-    console.log("Last answer (animal):", lastAnswer);
     if (!lastAnswer) {
       return res.status(400).json({ error: "Missing final answer (animal)" });
     }
 
+    // Get Pokémon name and image
+    const rawPokemonName = json.pokemon;
+    const pokemonName = json.pokemonName
+      .toLowerCase()
+      .replace(/\s/g, "-")
+      .replace(/[^a-z0-9-]/g, "");
+    let imageUrl = `https://img.pokemondb.net/artwork/large/${pokemonName}.jpg`;
+
+    console.log("Raw Pokémon:", rawPokemonName);
+    console.log("Provided Pokémon name:", json.pokemonName);
+    console.log("Formatted Pokémon name:", pokemonName);
+    console.log("Image URL:", imageUrl);
+
+    // Check if image exists
+    const exists = await checkImageExists(imageUrl);
+    if (!exists) {
+      const validName = await validatePokemon(rawPokemonName);
+      if (validName) {
+        const safeName = validName
+          .toLowerCase()
+          .replace(/\s/g, "-")
+          .replace(/[^a-z0-9-]/g, "");
+        imageUrl = `https://img.pokemondb.net/artwork/large/${safeName}.jpg`;
+      } else {
+        imageUrl = "https://img.pokemondb.net/artwork/large/missingno.jpg"; // fallback
+      }
+    }
+
+    // Store everything in DB
     await personalityModel.findOneAndUpdate(
       { customId: req.params.id },
-      { customId: req.params.id, ...json },
+      {
+        customId: req.params.id,
+        ...json,
+        pokemonImage: imageUrl,
+        pokemonName: pokemonName,
+      },
       { upsert: true, new: true, overwrite: true }
     );
 
     res.json({
       message: "Personality result saved successfully.",
-      personality: json,
+      personality: {
+        ...json,
+        pokemonImage: imageUrl,
+        pokemonName: pokemonName,
+      },
     });
-
   } catch (err) {
     console.error("Error generating or saving personality result:", err);
     res.status(500).json({ error: "Internal server error" });
   }
 });
 
-app.get('/api/:id/personality', async (req, res) => {
+app.get("/api/:id/personality", async (req, res) => {
   try {
-    console.log('Fetching personality result for ID:', req.params.id);
+    console.log("Fetching personality result for ID:", req.params.id);
     const result = await personalityModel.findOne({ customId: req.params.id });
-    if (!result) return res.status(404).json({ message: 'Not found' });
-    console.log('Result:', result);
+    if (!result) return res.status(404).json({ message: "Not found" });
+    console.log("Result:", result);
     res.json(result);
   } catch (err) {
-    res.status(500).json({ message: 'Server error' });
+    res.status(500).json({ message: "Server error" });
   }
 });
 

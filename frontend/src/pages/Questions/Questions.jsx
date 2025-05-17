@@ -10,7 +10,6 @@ const Questions = () => {
   const [error, setError] = useState(null);
   const [answers, setAnswers] = useState({});
   const [customAnswers, setCustomAnswers] = useState({});
-  const [favAnimal, setFavAnimal] = useState("");
 
   useEffect(() => {
     const fetchQuestions = async () => {
@@ -59,8 +58,8 @@ const Questions = () => {
     const allAnswered = questions.every(
       (_, i) => answers[i] || customAnswers[i]
     );
-    if (!allAnswered || !favAnimal.trim()) {
-      alert("Please answer all questions and enter your favourite animal.");
+    if (!allAnswered) {
+      alert("Please answer all questions.");
       return;
     }
 
@@ -68,11 +67,6 @@ const Questions = () => {
       questionText: q.questionText,
       selectedOption: answers[i] || customAnswers[i],
     }));
-
-    formatted.push({
-      questionText: "What's your favourite animal?",
-      selectedOption: favAnimal.trim(),
-    });
 
     try {
       setSubmitLoading(true);
@@ -158,18 +152,6 @@ const Questions = () => {
               </div>
             );
           })}
-
-          <div>
-            <p>{questions.length + 1}. What's your favourite animal?</p>
-            <input
-              type="text"
-              value={favAnimal}
-              onChange={(e) => setFavAnimal(e.target.value)}
-              placeholder="Type your answer here"
-              style={{ width: "60%" }}
-            />
-            <hr />
-          </div>
 
           <button
             onClick={handleSubmit}
