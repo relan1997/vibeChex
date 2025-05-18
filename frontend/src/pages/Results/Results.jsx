@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
-import { useParams } from "react-router-dom";
+import { useParams, Link } from "react-router-dom";
 import axios from "axios";
-import { X } from "lucide-react";
+import { X, Home } from "lucide-react";
 import styled, { keyframes } from "styled-components";
 
 // Animations from HomePage
@@ -321,6 +321,30 @@ const ProfileImage = styled.div`
   }
 `;
 
+const HomeButton = styled(Link)`
+  position: fixed;
+  top: 1rem;
+  left: 1rem;
+  width: 3.5rem;
+  height: 3.5rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  background: linear-gradient(90deg, #232526 0%, #18191a 100%);
+  border: 2px solid #bfc1c2;
+  z-index: 10;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+  color: #e0e0e0;
+  transition: transform 0.2s, box-shadow 0.3s;
+
+  &:hover {
+    transform: scale(1.05);
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.4);
+    color: #bfc1c2;
+  }
+`;
+
 const RoastButton = styled.button`
   background: linear-gradient(90deg, #232526 0%, #18191a 100%);
   color: #e0e0e0;
@@ -469,7 +493,7 @@ const Results = () => {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const backendUrl = "http://localhost:1997";
+        const backendUrl = import.meta.env.VITE_BACKEND_URL;
         const res = await axios.get(`${backendUrl}/api/${id}/personality`);
         console.log("Fetched data:", res.data);
         setResult(res.data);
@@ -551,6 +575,12 @@ const resultSections = [
       <AccentCircle />
       <AccentCircle />
       <AccentCircle />
+      
+      {/* Add Home Button */}
+      <HomeButton to="/">
+        <Home size={24} />
+      </HomeButton>
+      
       {result.profileImage && (
         <ProfileImage>
           <img src={result.profileImage} alt="Profile" />
@@ -626,12 +656,12 @@ const resultSections = [
           <TwitterButton
             onClick={() => {
               const text = encodeURIComponent(
-                "Check out my personality vibe results! 🔮👇"
+                "🔥 OMG I just discovered my TRUE personality vibe and I'm SHOOK!! 🤯 Had to share my results - take the quiz NOW and find your vibe match!! #VibeCheck #PersonalityReveal #ThisIsSOMe"
               );
               const url = encodeURIComponent(window.location.href);
               const hashtags = "personalitytest,vibes,results";
               window.open(
-                `https://twitter.com/intent/tweet?text=${text}&url=${url}&hashtags=${hashtags}`,
+                `https://twitter.com/intent/tweet?text=${text}&url=${url}`,
                 "_blank"
               );
             }}

@@ -32,6 +32,8 @@ For each key (except pokemonName), also provide a **1-sentence** description exp
 The **roast** must be a **10-sentence** clever, slightly savage, and sarcastic takedown of the user's character. It should exaggerate known flaws humorously, reflect deeper psychological insights, and mirror real-life behaviors with brutal honesty. Make it smart, edgy, and entertaining.
 
 Respond with **only** the JSON object and nothing else.
+
+RESPOND USING SIMPLE LANGUAGE ONLY, NO HIGH LEVEL VOCABULARY, NO COMPLEX SENTENCES, AND NO TECHNICAL TERMS.
   `;
 }
 

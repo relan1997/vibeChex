@@ -21,7 +21,7 @@ Return the data in the following JSON format:
   ]
 }
 
-STRICTLY There must be exactly 15 questions, each with exactly and strictly  8 options.
+STRICTLY There must be exactly 15 questions, each with exactly and strictly and only *8* options.
 
 The vibe types you must use as the inspiration for the personality traits behind each option are:
 

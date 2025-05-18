@@ -1,7 +1,11 @@
 import React, { useEffect, useState, useCallback } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import styled, { keyframes } from "styled-components";
-import { FaArrowLeft, FaArrowRight } from "react-icons/fa";
+import { FaArrowLeft, FaArrowRight, FaHome } from "react-icons/fa";
+
+// --- Environment Variables ---
+// Use environment variable with a fallback to localhost
+const BACKEND_URL = import.meta.env.VITE_BACKEND_URL
 
 // --- Animations and Styles ---
 const gradient = keyframes`
@@ -311,6 +315,44 @@ const ErrorContainer = styled.div`
   color: #e88;
 `;
 
+const HomeButton = styled.button`
+  position: absolute;
+  top: 20px;
+  left: 20px;
+  background: rgba(24, 25, 26, 0.8);
+  color: #e0e0e0;
+  padding: 10px;
+  border-radius: 50%;
+  border: none;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+  transition: all 0.2s ease;
+  
+  &:hover {
+    background: rgba(191, 193, 194, 0.2);
+    transform: translateY(-2px);
+  }
+`;
+
+const KeyboardTip = styled.div`
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-top: 1rem;
+  padding: 8px 16px;
+  background: rgba(191, 193, 194, 0.1);
+  border-radius: 8px;
+  font-size: 0.9rem;
+  color: #bfc1c2;
+  
+  & svg {
+    margin: 0 8px;
+  }
+`;
+
 // --- Main Component ---
 const Questions = () => {
   const { id } = useParams();
@@ -334,8 +376,7 @@ const Questions = () => {
   useEffect(() => {
     const fetchQuestions = async () => {
       try {
-        const backendUrl = "http://localhost:1997";
-        const res = await fetch(`${backendUrl}/api/${id}/generate`, {
+        const res = await fetch(`${BACKEND_URL}/api/${id}/generate`, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
         });
@@ -403,14 +444,12 @@ const Questions = () => {
 
   const handleRadioChange = (questionIndex, value) => {
     setAnswers((prev) => ({ ...prev, [questionIndex]: value }));
-    setCustomAnswers((prev) => ({ ...prev, [questionIndex]: "" }));
+    // Removed the line that clears custom answers when selecting a radio button
   };
 
   const handleCustomInput = (questionIndex, value) => {
     setCustomAnswers((prev) => ({ ...prev, [questionIndex]: value }));
-    if (value.trim()) {
-      setAnswers((prev) => ({ ...prev, [questionIndex]: "" }));
-    }
+    // Removed the line that updates answers when entering custom text
   };
 
   const handleSubmit = async () => {
@@ -423,15 +462,18 @@ const Questions = () => {
       return;
     }
 
+    // Modified to include both radio button and custom input values
     const formatted = questions.map((q, i) => ({
       questionText: q.questionText,
-      selectedOption: answers[i] || customAnswers[i],
+      selectedOption: answers[i] && customAnswers[i]?.trim() 
+        ? `${answers[i]} && ${customAnswers[i]}` 
+        : answers[i] || customAnswers[i],
     }));
 
     try {
       setSubmitLoading(true);
 
-      const res = await fetch(`http://localhost:1997/api/${id}/result`, {
+      const res = await fetch(`${BACKEND_URL}/api/${id}/result`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ answers: formatted }),
@@ -450,9 +492,16 @@ const Questions = () => {
     }
   };
 
+  const goToHome = () => {
+    navigate('/');
+  };
+
   if (loading)
     return (
       <Container>
+        <HomeButton onClick={goToHome} title="Go to Home">
+          <FaHome size={22} />
+        </HomeButton>
         <Card>
           <LoadingContainer>
             <Title>Loading questions...</Title>
@@ -464,6 +513,9 @@ const Questions = () => {
   if (error)
     return (
       <Container>
+        <HomeButton onClick={goToHome} title="Go to Home">
+          <FaHome size={22} />
+        </HomeButton>
         <Card>
           <Title>Error</Title>
           <ErrorContainer>{error}</ErrorContainer>
@@ -472,11 +524,14 @@ const Questions = () => {
     );
 
   const q = questions[current];
-  const isCustomFilled = customAnswers[current]?.trim().length > 0;
-  const isRadioSelected = !!answers[current];
+  // Removed variables that were used for disabling inputs
 
   return (
     <Container>
+      <HomeButton onClick={goToHome} title="Go to Home">
+        <FaHome size={22} />
+      </HomeButton>
+      
       {toast.show && (
         <Toast>
           <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -506,7 +561,7 @@ const Questions = () => {
                     value={opt}
                     checked={answers[current] === opt}
                     onChange={() => handleRadioChange(current, opt)}
-                    disabled={isCustomFilled}
+                    // Removed disabled attribute
                   />
                   {opt}
                 </OptionLabel>
@@ -520,11 +575,15 @@ const Questions = () => {
                   type="text"
                   value={customAnswers[current] || ""}
                   onChange={(e) => handleCustomInput(current, e.target.value)}
-                  disabled={isRadioSelected}
+                  // Removed disabled attribute
                   placeholder="Type your own answer"
                 />
               </OptionLabel>
             </CustomInputContainer>
+
+            <KeyboardTip>
+              <FaArrowLeft size={14} /> <FaArrowRight size={14} /> Use arrow keys to navigate between questions
+            </KeyboardTip>
           </SlideInner>
         </SlideWrapper>
 
